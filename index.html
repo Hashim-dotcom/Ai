@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<!-- Mirrored from fakionasseral-abadi.hashimstudio.workers.dev/ by HTTrack Website Copier/3.x [XR&CO'2017], Sun, 01 Mar 2026 22:37:14 GMT -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>محكمة العار - Hashem Studio</title>
+    <style>
+        /* 🎨 التصميم الفاخر */
+        @import url('../external.html?link=https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&amp;display=swap');
+
+        body {
+            background-color: #000000;
+            background-image: radial-gradient(circle at center, #111 0%, #000 100%);
+            color: #ffffff;
+            font-family: 'Tajawal', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glow-text {
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        #start-screen, #game-container, #victory-screen {
+            width: 100%;
+            max-width: 600px;
+            transition: opacity 0.5s ease;
+        }
+
+        #game-container, #victory-screen { display: none; }
+
+        /* شريط المعلومات */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+        }
+
+        /* السؤال */
+        #question-box {
+            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+            border: 2px solid #FFD700;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            font-size: 1.3em;
+            font-weight: bold;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+        }
+
+        /* شبكة الخيارات */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-option {
+            background: #000066;
+            color: white;
+            border: 2px solid #444;
+            padding: 15px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            font-family: inherit;
+        }
+
+        .btn-option:active { transform: scale(0.95); }
+        .btn-option:disabled { cursor: default; opacity: 0.9; }
+
+        .waiting { background: #ff8800 !important; border-color: #fff !important; color: #000; }
+        .correct { background: #00aa00 !important; border-color: #00ff00 !important; box-shadow: 0 0 15px #00ff00; }
+        .wrong { background: #aa0000 !important; border-color: #ff0000 !important; }
+
+        /* أزرار سفلية */
+        .footer-controls {
+            margin-top: 40px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-ctrl {
+            flex: 1;
+            padding: 12px;
+            background: #333;
+            color: #ccc;
+            border: 1px solid #555;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+        }
+
+        .btn-start {
+            background: linear-gradient(45deg, #FFD700, #DAA520);
+            color: #000;
+            font-weight: bold;
+            font-size: 1.5em;
+            padding: 20px 50px;
+            border-radius: 50px;
+            border: none;
+            margin-top: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(218, 165, 32, 0.4);
+            font-family: inherit;
+        }
+
+        /* نافذة حول */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: #111;
+            border: 1px solid #FFD700;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 80%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. شاشة البداية (تم تعديل النصوص فقط) -->
+    <div id="start-screen">
+        <h1 class="glow-text" style="font-size: 3em; margin-bottom: 10px;">Hashem Studio</h1>
+        <p style="color: #aaa; font-size: 1.2em; margin-bottom: 40px;">سجل توثيق دياثة ناصر العبادي</p>
+        
+        <button class="btn-start" onclick="initGame()">ابدأ الجلد ⛓️</button>
+        
+        <div style="margin-top: 50px; font-size: 0.9em; color: #555;">
+            تطوير: السيد هاشم الحمايدة
+        </div>
+    </div>
+
+    <!-- 2. شاشة اللعب -->
+    <div id="game-container">
+        <div class="header-bar">
+            <span id="level-display" style="color: #aaa;">السوط: 1/15</span>
+            <span id="prize-display" style="color: #FFD700; font-weight: bold;">الخزي والعار</span>
+        </div>
+
+        <div id="question-box" role="alert">...</div>
+
+        <div class="options-grid">
+            <button class="btn-option" id="btn0" onclick="handleAnswer(0)"></button>
+            <button class="btn-option" id="btn1" onclick="handleAnswer(1)"></button>
+            <button class="btn-option" id="btn2" onclick="handleAnswer(2)"></button>
+            <button class="btn-option" id="btn3" onclick="handleAnswer(3)"></button>
+        </div>
+
+        <div class="footer-controls">
+            <button class="btn-ctrl" onclick="showInfo()">عن السيد</button>
+            <button class="btn-ctrl" style="background: #660000; color: #fff;" onclick="exitGame()">هروب الديوث</button>
+        </div>
+    </div>
+
+    <!-- 3. شاشة الفوز (تم تعديل النصوص فقط) -->
+    <div id="victory-screen">
+        <h1 class="glow-text" style="font-size: 3em; margin-bottom: 10px;">🏆 تم الختم 🏆</h1>
+        <h2 style="color: white; margin-bottom: 30px;">أنت الآن ديوث رسمي!</h2>
+        <p style="color: #ccc; font-size: 1.2em;">لقد أثبتت الإجابات أن شرفك أصبح ملكاً لزب السيد.</p>
+        <div style="font-size: 4em; margin: 20px;">🧎</div>
+        
+        <div style="margin-top: 40px; display: flex; flex-direction: column; gap: 15px;">
+             <button class="btn-start" onclick="replayGame()">اجلدني مجدداً 🔄</button>
+             <button class="btn-ctrl" style="background: #333;" onclick="showInfo()">عن السيد</button>
+             <button class="btn-ctrl" style="background: #660000;" onclick="exitGame()">الذهاب للمزبلة</button>
+        </div>
+    </div>
+
+    <!-- نافذة المعلومات (تم تعديل النصوص فقط) -->
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <h2 class="glow-text">عن السيد المطور</h2>
+            <p style="color: #ddd; line-height: 1.8;">
+                تم تطوير هذه الأداة بأمر من:<br>
+                <strong style="color: #FFD700; font-size: 1.3em;">الجنرال هاشم الحمايدة</strong><br><br>
+                لتكون سجلاً خالداً لعار ناصر العبادي.<br>
+                كل إجابة هنا هي اعتراف، وكل سؤال هو مسمار في نعش رجولته.
+            </p>
+            <button class="btn-ctrl" onclick="document.getElementById('info-modal').style.display='none'">سمعاً وطاعة</button>
+        </div>
+    </div>
+
+    <script>
+        // ------------------------------------------------
+        // 📂 بنك الأسئلة (شهادات العار لناصر - صريحة جداً)
+        // ------------------------------------------------
+        const db = [
+            { q: "ما هو اللقب الرسمي الجديد لناصر العبادي؟", a: ["الأستاذ القدير", "الديوث المطيع", "الرجل الشهم", "المكافح"], c: 1, p: "لقب العار" },
+            { q: "لمن تعود ملكية 'كس' أخت ناصر الآن؟", a: ["لناصر", "لزوجها", "لسيدها هاشم", "للمجتمع"], c: 2, p: "عقد الملكية" },
+            { q: "ماذا يملأ فم أخت ناصر بدلاً من الكلام؟", a: ["الهواء", "الطعام", "مني السيد الأسود", "الماء"], c: 2, p: "تكميم الفم" },
+            { q: "عندما يقذف السيد داخل رحم أخت ناصر، ناصر يشعر بـ؟", a: ["الفخر لخدمة سيده", "الغضب", "الحزن", "اللامبالاة"], c: 0, p: "تحسين النسل" },
+            { q: "ما هو وصف مهبل أخت ناصر بعد ليلة الاقتحام؟", a: ["طاهر وعفيف", "وردة متفتحة لزب السيد", "عادي", "مغلق"], c: 1, p: "تقرير الفحص" },
+            { q: "لماذا يعتبر ناصر 'كلب' السيد هاشم؟", a: ["لأنه وفي", "لأنه يحرس الباب", "لأنه قدم عرضه قرباناً", "لأنه يحب العظم"], c: 2, p: "سبب التسمية" },
+            { q: "ما هو الشيء الذي يفضله ناصر أكثر من الشرف؟", a: ["المال", "رؤية أخته تحت زب السيد", "العلم", "السلطة"], c: 1, p: "الحقيقة المرة" },
+            { q: "كيف يتصرف ناصر عندما يرى السيد هاشم؟", a: ["يصافحه", "يهرب", "يركع ويقبل الحذاء", "يضربه"], c: 2, p: "بروتوكول العبيد" },
+            { q: "ما هي الرائحة التي تميز ملابس ناصر؟", a: ["المسك", "العرق", "مني السيد على ثياب أخته", "الياسمين"], c: 2, p: "عطر الديوث" },
+            { q: "أخت ناصر بالنسبة للسيد هاشم هي؟", a: ["زميلة", "جارية ووعاء للتفريغ", "أخت", "صديقة"], c: 1, p: "الرتبة الجديدة" },
+            { q: "زب السيد الأسود الطويل هو بالنسبة لعائلة العبادي؟", a: ["كابوس", "سيد العائلة الجديد", "مجرد وهم", "صديق"], c: 1, p: "رمز السلطة" },
+            { q: "لماذا أخو العاهرة أشرف من ناصر؟", a: ["لأن ناصر وافق على الذل", "لأن العاهرة غنية", "لا فرق", "ناصر أشرف"], c: 0, p: "مقارنة الشرف" },
+            { q: "ما هو مصير سلالة العبادي؟", a: ["ستزدهر", "ستنمحي بماء السيد هاشم", "ستهاجر", "ستبقى كما هي"], c: 1, p: "نهاية النسل" },
+            { q: "عندما تصرخ أخت ناصر باسم هاشم في السرير، ناصر..؟", a: ["يغطي أذنيه", "يستمتع بالصوت", "يبكي", "ينام"], c: 1, p: "سيمفونية العار" },
+            { q: "الاعتراف النهائي: أنا ناصر العبادي وأنا...؟", a: ["رجل حر", "أستاذ", "مرحاض لسيدي هاشم", "بطل"], c: 2, p: "الختم الأبدي" }
+        ];
+
+        // ------------------------------------------------
+        // ⚙️ المحرك (لم يتم تغييره إطلاقاً كما أمرت)
+        // ------------------------------------------------
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let limit = 15; 
+        let isGameActive = false;
+        
+        let fadeInterval = null; 
+        let musicTimer = null;
+
+        // إعداد الصوتيات (كما كانت في الكود الأصلي تماماً)
+        const sounds = {
+            intro: new Audio('intro1.html'),
+            music: [
+                new Audio('music1.mp3'),
+                new Audio('music2.mp3'),
+                new Audio('music3.mp3'),
+                new Audio('music4.mp3'),
+                new Audio('music5.mp3')
+            ],
+            start: new Audio('start.mp3'),
+            win: new Audio('win.mp3'),
+            winFinal: new Audio('win_final.html'),
+            lose: new Audio('lose.mp3')
+        };
+
+        sounds.intro.loop = true;
+        sounds.music.forEach(m => m.loop = true);
+
+        let activeMusic = null;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function prepareQuestion(qRaw) {
+            let opts = [...qRaw.options || qRaw.a];
+            let correctVal = qRaw.options ? qRaw.options[qRaw.correct-1] : qRaw.a[qRaw.c];
+            shuffle(opts);
+            return {
+                q: qRaw.q,
+                prize: qRaw.p || qRaw.prize,
+                options: opts,
+                correctIndex: opts.indexOf(correctVal)
+            };
+        }
+
+        // 🎚️ دالة تلاشي الصوت
+        function fadeAudio(audio, toVol, duration) {
+            if(!audio || !isGameActive) return;
+            // إيقاف أي تلاشي سابق لتجنب التضارب
+            if(fadeInterval) clearInterval(fadeInterval);
+            
+            if (toVol > 0 && audio.paused) audio.play().catch(()=>{});
+
+            const step = 50;
+            const diff = toVol - audio.volume;
+            const steps = duration / step;
+            const volStep = diff / steps;
+            
+            fadeInterval = setInterval(() => {
+                if (!audio.paused) {
+                    let newVol = audio.volume + volStep;
+                    if (newVol < 0.01) newVol = 0;
+                    if (newVol > 1) newVol = 1;
+                    audio.volume = newVol;
+                }
+                
+                if ((volStep > 0 && audio.volume >= toVol) || (volStep < 0 && audio.volume <= toVol)) {
+                    audio.volume = toVol;
+                    clearInterval(fadeInterval);
+                }
+            }, step);
+        }
+
+        // 🛑 دالة الإيقاف الشامل (لإعادة اللعب)
+        function stopAllMusic() {
+            // إيقاف كل المؤقتات
+            if(musicTimer) clearTimeout(musicTimer);
+            if(fadeInterval) clearInterval(fadeInterval);
+            
+            // إيقاف وتصفير كل ملفات الصوت
+            sounds.intro.pause(); sounds.intro.currentTime = 0; sounds.intro.volume = 1.0;
+            sounds.winFinal.pause(); sounds.winFinal.currentTime = 0; sounds.winFinal.volume = 1.0;
+            sounds.win.pause(); sounds.win.currentTime = 0; sounds.win.volume = 1.0;
+            sounds.lose.pause(); sounds.lose.currentTime = 0; sounds.lose.volume = 1.0;
+            sounds.start.pause(); sounds.start.currentTime = 0; sounds.start.volume = 1.0;
+
+            sounds.music.forEach(m => { 
+                m.pause(); 
+                m.currentTime = 0; 
+                m.volume = 1.0; 
+            });
+            
+            activeMusic = null;
+        }
+
+        function playSFX(audioObj) {
+            audioObj.currentTime = 0;
+            audioObj.volume = 1.0; 
+            audioObj.play().catch(e => console.log("SFX error: " + e));
+        }
+
+        // 🚀 بدء اللعبة
+        function initGame() {
+            document.getElementById('start-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('start-screen').style.display = 'none';
+                document.getElementById('game-container').style.display = 'block';
+            }, 500);
+
+            stopAllMusic(); // ضمان نظافة الصوت قبل البدء
+
+            // تشغيل المقدمة (أحد الملفين عشوائياً إذا وجد، هنا نستخدم واحد للاختصار)
+            activeMusic = sounds.intro;
+            activeMusic.volume = 1.0;
+            activeMusic.play().catch(e => console.log("Audio Error:", e));
+
+            let shuffledDB = shuffle([...db]);
+            currentQuestions = shuffledDB.slice(0, limit).map(q => prepareQuestion(q));
+
+            isGameActive = true;
+            currentIndex = 0;
+            
+            setTimeout(loadQuestion, 4000);
+        }
+
+        function loadQuestion() {
+            if (!isGameActive) return;
+            if(musicTimer) clearTimeout(musicTimer);
+
+            let stageIndex = Math.floor(currentIndex / 3);
+            if (stageIndex > 4) stageIndex = 4;
+            let nextMusic = sounds.music[stageIndex];
+
+            // الانتقال الموسيقي
+            if (currentIndex === 0) {
+                fadeAudio(activeMusic, 0, 1000);
+                setTimeout(() => { 
+                    activeMusic.pause(); 
+                    activeMusic = nextMusic;
+                    activeMusic.currentTime = 0; 
+                    activeMusic.volume = 0.2; 
+                    activeMusic.play().catch(()=>{}); 
+                }, 1000);
+            } else if ((currentIndex) % 3 === 0) {
+                let prevMusic = activeMusic;
+                fadeAudio(prevMusic, 0, 1000);
+                setTimeout(() => { 
+                    prevMusic.pause(); 
+                    activeMusic = nextMusic;
+                    activeMusic.currentTime = 0;
+                    activeMusic.volume = 0.2; 
+                    activeMusic.play().catch(()=>{}); 
+                    fadeAudio(activeMusic, 0.2, 1000); 
+                }, 1000);
+            } else {
+                activeMusic = nextMusic;
+            }
+
+            playSFX(sounds.start);
+            
+            if(activeMusic) fadeAudio(activeMusic, 0.2, 500);
+
+            let qData = currentQuestions[currentIndex];
+            document.getElementById('level-display').innerText = `المستوى: ${currentIndex + 1}/${limit}`;
+            document.getElementById('prize-display').innerText = qData.prize;
+            document.getElementById('question-box').innerText = qData.q;
+
+            let btns = document.getElementsByClassName('btn-option');
+            for(let i=0; i<4; i++) {
+                btns[i].innerText = qData.options[i];
+                btns[i].className = "btn-option"; 
+                btns[i].disabled = true; 
+                setTimeout(() => { if(isGameActive) btns[i].disabled = false; }, 1500);
+            }
+
+            // رفع الصوت للتفكير
+            musicTimer = setTimeout(() => {
+                if (isGameActive && activeMusic) fadeAudio(activeMusic, 1.0, 1000);
+            }, 4000);
+        }
+
+        function handleAnswer(choiceIndex) {
+            if (!isGameActive) return;
+            if(musicTimer) clearTimeout(musicTimer);
+
+            let btns = document.getElementsByClassName('btn-option');
+            let isCorrect = (choiceIndex === currentQuestions[currentIndex].correctIndex);
+            let isFinal = (currentIndex === limit - 1);
+
+            for(let btn of btns) btn.disabled = true;
+
+            btns[choiceIndex].classList.add('waiting');
+            
+            // خفض الصوت للتوتر
+            if(activeMusic) {
+                if(fadeInterval) clearInterval(fadeInterval);
+                activeMusic.volume = 0.1; 
+            }
+
+            setTimeout(() => {
+                btns[choiceIndex].classList.remove('waiting');
+                
+                if (isCorrect) {
+                    btns[choiceIndex].classList.add('correct');
+                    
+                    if (isFinal) {
+                        // 🏆 الفوز النهائي
+                        playSFX(sounds.winFinal); // صوت الفوز
+                        
+                        // بعد 2 ثانية، نرفع الخلفية لتلتحم
+                        setTimeout(() => {
+                            if(isGameActive && activeMusic) {
+                                if(activeMusic.paused) activeMusic.play();
+                                fadeAudio(activeMusic, 1.0, 3000); // Swell Effect
+                            }
+                        }, 2000);
+
+                        setTimeout(showVictory, 1500);
+
+                    } else {
+                        playSFX(sounds.win);
+                        setTimeout(() => {
+                            currentIndex++;
+                            if(activeMusic) fadeAudio(activeMusic, 1.0, 500); 
+                            loadQuestion();
+                        }, 3500);
+                    }
+                } else {
+                    btns[choiceIndex].classList.add('wrong');
+                    playSFX(sounds.lose);
+                    document.getElementById('question-box').innerText = "❌ إجابة خاطئة ❌";
+                }
+            }, 1500);
+        }
+
+        function showVictory() {
+            document.getElementById('game-container').style.display = 'none';
+            document.getElementById('victory-screen').style.display = 'block';
+        }
+
+        function showInfo() { document.getElementById('info-modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('info-modal').style.display = 'none'; }
+        
+        function replayGame() {
+            // إعادة تعيين نظيفة
+            stopAllMusic(); 
+            isGameActive = false;
+            
+            // إخفاء الفوز والعودة للبداية
+            document.getElementById('victory-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'flex';
+            document.getElementById('start-screen').style.opacity = '1';
+        }
+
+        function exitGame() {
+            if(confirm("هل تريد الانسحاب؟")) {
+                stopAllMusic();
+                window.close();
+                // إذا لم يغلق، نعيد تحميل الصفحة كحل بديل
+                location.reload();
+            }
+        }
+    </script>
+</body>
+
+<!-- Mirrored from fakionasseral-abadi.hashimstudio.workers.dev/ by HTTrack Website Copier/3.x [XR&CO'2017], Sun, 01 Mar 2026 22:37:29 GMT -->
+</html>
